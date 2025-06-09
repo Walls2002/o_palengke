@@ -35,7 +35,6 @@ const LoginScreen = () => {
     }
   };
 
-
   return (
     <SafeAreaView className="flex-1 items-center bg-white px-4">
       <Image
@@ -76,7 +75,12 @@ const LoginScreen = () => {
       >
         <Text className="text-white text-lg font-semibold">Login</Text>
       </TouchableOpacity>
-      <Text className="text-textPrimary mt-4">Don't have an account? Sign up as <TouchableOpacity>Customer</TouchableOpacity>or <TouchableOpacity>Vendor</TouchableOpacity></Text>
+
+      <Text className="text-textPrimary mt-4">
+        Don't have an account? Sign up as{" "}
+        <TouchableOpacity>Customer</TouchableOpacity>or{" "}
+        <TouchableOpacity>Vendor</TouchableOpacity>
+      </Text>
     </SafeAreaView>
   );
 };

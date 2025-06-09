@@ -1,15 +1,19 @@
 {
   "expo": {
     "name": "Opalengke",
-    "slug": "o_palengke",
+    "slug": "opalengke",
     "version": "1.0.0",
+    "owner": "johnl07",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,12 +22,19 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.expacc123.o_palengke",
+      "googleServicesFile": "./android/app/google-services.json",
+      "useNextNotificationsApi": true,
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
         "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ]
+      ],
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +45,13 @@
       "expo-router",
       [
         "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-notifications",
         {
           "image": "./assets/images/splash.png",
           "imageWidth": 200,
@@ -50,8 +68,11 @@
         "origin": false
       },
       "eas": {
-        "projectId": "c15e2b82-af26-488b-a22b-626b06f2d9cc"
+        "projectId": "4ae8666b-f1a2-4f03-aa8d-dbee48c84ef5"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4ae8666b-f1a2-4f03-aa8d-dbee48c84ef5"
     }
   }
 }

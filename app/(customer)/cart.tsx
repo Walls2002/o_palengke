@@ -295,7 +295,7 @@ export default function CartScreen() {
             refreshCart();
             fetchPendingOrders();
             handleCloseModal();
-          }, 2500);
+          }, 500);
         })
         .catch((error) => {
           console.error("Error storing order:", error);
@@ -452,8 +452,8 @@ export default function CartScreen() {
                           className="rounded-md w-full shadow-sm bg-card px-2 py-4  mt-2 h-auto"
                         >
                           <View className="flex flex-row items-center justify-between w-full ">
-                            <Text className="font-bold text-lg text-primary">
-                              <View className="flex flex-row items-center justify-between w-full ">
+                            <Text className="font-bold text-lg text-primary w-full">
+                              <View className=" flex-row items-center justify-between w-full">
                                 <Text className="font-bold text-lg text-primary">
                                   {product?.name || "Product"}
                                 </Text>
@@ -461,18 +461,18 @@ export default function CartScreen() {
                                   ₱{product?.total_cost || "0.00"}
                                 </Text>
                               </View>
-                              <Text className="text-textSecondary">
-                                {product?.measurement === "kilo" &&
-                                product?.kilo_measurement
-                                  ? `${formatKiloMeasurement(
-                                      product.kilo_measurement
-                                    )} ${product.measurement}`
-                                  : `${product?.selected_qty || 0} ${
-                                      product?.measurement || "unit"
-                                    }`}
-                              </Text>
                             </Text>
                           </View>
+                          <Text className="text-textSecondary text-right">
+                            {product?.measurement === "kilo" &&
+                            product?.kilo_measurement
+                              ? `${formatKiloMeasurement(
+                                  product.kilo_measurement
+                                )} ${product.measurement}`
+                              : `${product?.selected_qty || 0} ${
+                                  product?.measurement || "unit"
+                                }`}
+                          </Text>
                           <View className="mt-4 flex flex-row justify-end items-center gap-x-4">
                             <TouchableOpacity
                               activeOpacity={0.7}

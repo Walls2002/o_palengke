@@ -12,17 +12,48 @@ export const deliveryApi = {
       console.error("Error fetching delivery", error);
     }
   },
+  async checkUniquenessPlateAndLicense(
+    plateNumber: string,
+    licenseNumber: string
+  ) {
+    try {
+      const response = await API.post("/riders/check-unique", {
+        plate_number: plateNumber,
+        license_number: licenseNumber,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error checking uniqueness", error);
+      throw error;
+    }
+  },
   async uploadProofOfDelivery(orderId: number, formData: FormData) {
     try {
-      const response = await API.post(`/rider-orders/${orderId}/deliver`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await API.post(
+        `/rider-orders/${orderId}/deliver`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response;
     } catch (error) {
       console.error("Error uploading proof of delivery", error);
       throw error;
     }
-  }
+  },
+  async registerRider(formData: FormData) {
+    try {
+      const response = await API.post("/riders/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error registering rider", error);
+      throw error;
+    }
+  },
 };

@@ -97,16 +97,19 @@ export default function OrderScreen() {
    * - `pollingInterval`: Ensures the previous interval is cleared before setting a new one.
    */
   useEffect(() => {
-    let pollingTime = 10000;
+    let pollingTime = 5000;
 
     // Critical tabs poll more frequently
     // Critical tabs poll more frequently
     if (index === 0 || index === 1) {
       pollingTime = 8000;
+      console.log(`Polling for critical tab ${index} every ${pollingTime}ms`);
+    } else if (index === 2 || index === 3) {
     } else {
+      console.warn(`Unknown tab index: ${index}. Defaulting to 15 seconds.`);
       pollingTime = 15000;
     }
-
+    console.log(`Setting polling time for tab ${index}: ${pollingTime}ms`);
     if (!appActive) pollingTime = 30000;
 
     const interval = setInterval(() => {
@@ -161,7 +164,7 @@ export default function OrderScreen() {
       prevCounts.current.confirmed = confirmedOrders.length;
       if (index !== 1) setConfirmedUpdated(true);
     }
-  }, [confirmedOrders, index]);
+  }, [confirmedOrders]);
 
   // For delivered orders
   useEffect(() => {

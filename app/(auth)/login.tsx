@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Toast from "react-native-toast-message";
-import { View, Text, TextInput, Image, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,6 +15,9 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/provider/AuthProvider";
 import { userApi } from "@/api/user/userApi";
+
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 const showToast = (user: any) => {
   Toast.show({
@@ -48,7 +58,6 @@ const Login = () => {
     }
   }, [success]);
 
-  
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -57,6 +66,7 @@ const Login = () => {
         password,
       });
       const { access_token, user, user_type } = response.data;
+      const expo_push_token = await AsyncStorage.getItem("expo_push_token");
 
       await AsyncStorage.setItem("auth_token", access_token);
       await AsyncStorage.setItem("user", JSON.stringify(user));
@@ -64,6 +74,30 @@ const Login = () => {
 
       await userApi.checkUserProfile();
       await loadUser();
+      if (expo_push_token && expo_push_token !== "") {
+        try {
+          const storeExpoToken = await axios.post(
+            `${baseUrl}/users/store-push-token`,
+            {
+              user_id: user.id,
+              expo_push_token: expo_push_token,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            }
+          );
+
+          if (storeExpoToken.data.code === 200) {
+            console.log(storeExpoToken.data.message);
+          } else {
+            console.error("Error saving push notification token");
+          }
+        } catch (error) {
+          console.error("Failed to store Expo push token:", error);
+        }
+      }
 
       handleNavigation(user_type, user);
     } catch (error) {
@@ -92,7 +126,6 @@ const Login = () => {
     }
   };
 
-
   const handleNavigation = (user_type: string, user: any) => {
     let route = "/(customer)";
     if (user_type === "vendor") {
@@ -107,16 +140,15 @@ const Login = () => {
     }, 1000);
   };
 
-
   const handleUserSignUp = (type: "customer" | "vendor") => {
     if (type === "customer") {
       router.push({
-        pathname: '/(auth)/register',
+        pathname: "/(auth)/register",
         params: { type: type },
       });
-    } else {
+    } else if (type === "vendor") {
       router.push({
-        pathname: '/(auth)/register',
+        pathname: "/(auth)/register",
         params: { type: type },
       });
     }
@@ -166,19 +198,30 @@ const Login = () => {
           <Text className="text-white text-lg font-semibold">Login</Text>
         )}
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/forgot-password")} // Replace with your actual route
+        className="mt-4"
+      >
+        <Text className="text-primary text-sm font-medium">
+          Forgot Password?
+        </Text>
+      </TouchableOpacity>
 
       <View className="mt-4 flex-row flex-wrap justify-center">
-        <Text className="text-textPrimary">Don't have an account? Sign up as </Text>
+        <Text className="text-textPrimary">
+          Don't have an account? Sign up as{" "}
+        </Text>
         <TouchableOpacity onPress={() => handleUserSignUp("customer")}>
-          <Text className="text-primary font-semibold">Customer</Text>
+          <Text className="text-primary font-semibold">Customer, </Text>
         </TouchableOpacity>
-        <Text className="text-textPrimary mx-1">or</Text>
         <TouchableOpacity onPress={() => handleUserSignUp("vendor")}>
           <Text className="text-primary font-semibold">Vendor</Text>
         </TouchableOpacity>
+        <Text className="text-textPrimary mx-1">or</Text>
+        <TouchableOpacity onPress={() => router.push("/rider-registration")}>
+          <Text className="text-primary font-semibold">Rider</Text>
+        </TouchableOpacity>
       </View>
-
-
     </SafeAreaView>
   );
 };

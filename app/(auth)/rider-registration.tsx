@@ -13,19 +13,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Eye, EyeOff } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 import { Picker } from "@react-native-picker/picker";
 import { Location } from "@/types/Location";
 import { data } from "@/api/vendor/vendorApi";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { userApi } from "@/api/customer/customerApi";
-
-type RegisterRouteParams = {
-  params: {
-    type: "customer" | "vendor";
-  };
-};
+import { deliveryApi } from "@/api/rider/deliveryApi";
+import { Store } from "@/types/Store";
 
 interface FormData {
   [key: string]: string | null;
@@ -37,12 +33,14 @@ interface FormData {
   location_id: null;
   password: string;
   confirm_password: string;
+  store_id: null;
+  license_number: string;
+  plate_number: string;
 }
 
 const Register = () => {
   const router = useRouter();
-  const route = useRoute<RouteProp<RegisterRouteParams, "params">>();
-  const { type } = route.params || {};
+
   const [form, setForm] = useState<FormData>({
     first_name: "",
     middle_name: "",
@@ -52,21 +50,44 @@ const Register = () => {
     location_id: null,
     password: "",
     confirm_password: "",
+    store_id: null,
+    license_number: "",
+    plate_number: "",
   });
 
   const [locationsList, setLocationsList] = useState<Location[]>([]);
+  const [storesList, setStoresList] = useState<Store[]>([]);
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchLocations();
+    fetchAllStores();
   }, []);
 
   const fetchLocations = async () => {
     const response = await data.vendorLocations();
     setLocationsList(response);
   };
+
+  const checkUniqueness = async (
+    license_number: string,
+    plate_number: string
+  ) => {
+    try {
+      const response = await deliveryApi.checkUniquenessPlateAndLicense(
+        plate_number,
+        license_number
+      );
+      return response;
+    } catch (error) {
+      console.error("Error checking uniqueness:", error);
+      showToast("Error checking uniqueness. Please try again.");
+      return null;
+    }
+  };
+
   const checkEmailUniqueness = async (email: string) => {
     try {
       const response = await userApi.checkEmailExists(email);
@@ -75,6 +96,16 @@ const Register = () => {
       console.error("Error checking email uniqueness:", error);
       showToast("Error checking email uniqueness. Please try again.");
       return null;
+    }
+  };
+
+  const fetchAllStores = async () => {
+    try {
+      const response = await data.vendorAllStores();
+      setStoresList(response);
+    } catch (error) {
+      console.error("Error fetching stores:", error);
+      showToast("Failed to fetch stores. Please try again.");
     }
   };
 
@@ -101,6 +132,10 @@ const Register = () => {
       "location_id",
       "password",
       "confirm_password",
+
+      "store_id",
+      "license_number",
+      "plate_number",
     ];
     const hasEmpty = requiredFields.some((key) => {
       const value = form[key as keyof typeof form];
@@ -119,13 +154,26 @@ const Register = () => {
       return;
     }
 
+    const uniquenessCheck = await checkUniqueness(
+      form.license_number,
+      form.plate_number
+    );
+
+    if (
+      (uniquenessCheck !== null && uniquenessCheck.plate_number_exists) ||
+      uniquenessCheck.license_number_exists
+    ) {
+      showToast("Plate number or license number already exists.");
+      setLoading(false);
+      return;
+    }
     const emailCheck = await checkEmailUniqueness(form.email);
     if (emailCheck && emailCheck.exists) {
       showToast("Email has already been taken. Please try again.");
       setLoading(false);
       return;
     }
-
+    // Password validation: at least 1 capital letter, 1 number, and minimum 8 characters
     const password = form.password;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -135,8 +183,6 @@ const Register = () => {
       setLoading(false);
       return;
     }
-
-    // Validate Philippine mobile number format: must be +63 followed by 10 digits
     const plus63MobileRegex = /^\+63\d{10}$/;
     if (!plus63MobileRegex.test(form.contact_number.trim())) {
       showToast(
@@ -149,9 +195,7 @@ const Register = () => {
     router.push(
       `/verify-otp-registration?email=${encodeURIComponent(
         form.email.trim()
-      )}&type=${encodeURIComponent(
-        type.toString().trim()
-      )}&first_name=${encodeURIComponent(
+      )}&type=${encodeURIComponent("rider")}&first_name=${encodeURIComponent(
         form.first_name.trim()
       )}&middle_name=${encodeURIComponent(
         form.middle_name.trim()
@@ -170,6 +214,13 @@ const Register = () => {
       }`
     );
 
+    // try {
+    //   let response = null;
+    // } catch (error) {
+    //   showToast("Email has already been taken. Please try again.");
+    // } finally {
+    //   setLoading(false);
+    // }
     setLoading(false);
   };
 
@@ -181,6 +232,9 @@ const Register = () => {
           className="h-[300px] w-[300px]"
           resizeMode="contain"
         />
+        <Text className="text-2xl font-bold text-primary mb-6">
+          Rider Registration
+        </Text>
 
         {[
           { placeholder: "First Name *", key: "first_name" },
@@ -237,6 +291,26 @@ const Register = () => {
                   key={location.id}
                   label={`${location.barangay}, ${location.province}, ${location.city}`}
                   value={location.id}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+        <View className="w-[300px] mb-4">
+          <Text className="mb-1 text-gray-700">
+            Store <Text className="text-red-500">*</Text>
+          </Text>
+          <View className="border border-gray-300 rounded-lg overflow-hidden h-12 justify-center">
+            <Picker
+              selectedValue={form.store_id}
+              onValueChange={(value) => handleChange("store_id", value)}
+            >
+              <Picker.Item label="Select Store" value="" />
+              {storesList.map((store) => (
+                <Picker.Item
+                  key={store.id}
+                  label={`${store.store_name}`}
+                  value={store.id}
                 />
               ))}
             </Picker>
