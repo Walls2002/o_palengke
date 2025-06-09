@@ -50,7 +50,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({
       [type]: Date.now(),
     }));
   };
- 
+
   const updateOrderStates = (
     response: OrdersResponse,
     responseType: string

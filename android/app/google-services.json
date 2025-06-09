@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "14805177325",
+    "project_id": "opalengje",
+    "storage_bucket": "opalengje.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14805177325:android:5656d1582070b769280de4",
+        "android_client_info": {
+          "package_name": "com.expacc123.o_palengke"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4RmUc9uRU8SOS3e45w9jSgakS_mh_xU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

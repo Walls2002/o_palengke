@@ -15,13 +15,12 @@ import Toast from "react-native-toast-message";
 import * as ImagePicker from "expo-image-picker";
 import { useOrders } from "@/provider/DeliveryOrderProvider";
 
-
 const DeliveryScreen = () => {
   const { orders, loading, fetchForDeliveryOrders } = useOrders();
   const [error, setError] = useState<unknown>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
   const openImagePickerAsync = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -41,10 +40,13 @@ const DeliveryScreen = () => {
       uri: image.uri,
       type: "image/jpeg",
       name: "proof.jpg",
-    });
+    } as any);
 
     try {
-      const response = await deliveryApi.uploadProofOfDelivery(selectedOrderId, formData);
+      const response = await deliveryApi.uploadProofOfDelivery(
+        selectedOrderId,
+        formData
+      );
 
       if (response.data.message === "Order delivered.") {
         Toast.show({
@@ -117,25 +119,26 @@ const DeliveryScreen = () => {
         <View className="bg-divider h-[3px] mt-2" />
 
         {/* Items */}
-        {item && item.items.map((product: any, index: number) => {
-          return (
-            <View key={index}>
-              <View className="flex flex-row items-center justify-between gap-x-2 mt-2">
-                <Text className="py-1 text-primary text-lg font-medium">
-                  {product.name}
-                </Text>
-                <Text className="text-primary text-lg font-medium">
-                  ₱{product.unit_price}
-                </Text>
+        {item &&
+          item.items.map((product: any, index: number) => {
+            return (
+              <View key={index}>
+                <View className="flex flex-row items-center justify-between gap-x-2 mt-2">
+                  <Text className="py-1 text-primary text-lg font-medium">
+                    {product.name}
+                  </Text>
+                  <Text className="text-primary text-lg font-medium">
+                    ₱{product.unit_price}
+                  </Text>
+                </View>
+                <View className="flex flex-row items-center justify-end gap-x-2">
+                  <Text className="text-primary text-lg font-medium">
+                    x {product.quantity}
+                  </Text>
+                </View>
               </View>
-              <View className="flex flex-row items-center justify-end gap-x-2">
-                <Text className="text-primary text-lg font-medium">
-                  x {product.quantity}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
+            );
+          })}
 
         {/* Order Summary */}
         <View className="mt-8 flex justify-end">
@@ -196,14 +199,24 @@ const DeliveryScreen = () => {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white rounded-xl p-5 w-[90%]">
-            <Text className="text-lg font-bold mb-2">Upload Delivery Proof</Text>
+            <Text className="text-lg font-bold mb-2">
+              Upload Delivery Proof
+            </Text>
             {image ? (
               <Image
                 source={{ uri: image.uri }}
-                style={{ width: "100%", height: 200, marginBottom: 10, borderRadius: 10 }}
+                style={{
+                  width: "100%",
+                  height: 200,
+                  marginBottom: 10,
+                  borderRadius: 10,
+                }}
               />
             ) : (
-              <TouchableOpacity onPress={openImagePickerAsync} className="bg-gray-200 p-4 rounded-lg mb-4">
+              <TouchableOpacity
+                onPress={openImagePickerAsync}
+                className="bg-gray-200 p-4 rounded-lg mb-4"
+              >
                 <Text className="text-center text-black">Pick an Image</Text>
               </TouchableOpacity>
             )}

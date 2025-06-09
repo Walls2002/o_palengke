@@ -36,6 +36,7 @@ import { Profile, UserCredentials } from "@/types/Profile";
 import { useAuth } from "@/provider/AuthProvider";
 import { userApi } from "@/api/user/userApi";
 import capitalizeWords from "@/utils/formatString";
+import * as Notifications from "expo-notifications";
 
 export default function ProfileScreen() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -283,11 +284,11 @@ export default function ProfileScreen() {
   const handleUpdateBasicInformation = async () => {
     try {
       const payload = {
-        first_name: userProfileForm.first_name,
-        last_name: userProfileForm.last_name,
-        middle_name: userProfileForm.middle_name,
-        email: userProfileForm.email,
-        contact: userProfileForm.contact,
+        first_name: userProfileForm.first_name || "",
+        last_name: userProfileForm.last_name || "",
+        middle_name: userProfileForm.middle_name || "",
+        email: userProfileForm.email || "",
+        contact: userProfileForm.contact || "",
         location_id: userProfileForm.location_id,
       };
 
@@ -311,6 +312,12 @@ export default function ProfileScreen() {
 
       setUser(updatedUser);
     } catch (error) {
+      const errorMessage =
+        (error as any)?.response?.data?.message ||
+        (error as any)?.message ||
+        "An error occurred while updating profile";
+      console.error("Error updating profile:", errorMessage);
+
       console.error("Error updating profile:", error);
       Toast.show({
         type: "error",
@@ -377,7 +384,7 @@ export default function ProfileScreen() {
   };
 
   // Function to cancel basic information editing
-  const handleCancelBasicInfoEdit = () => {
+  const handleCancelBasicInfoEdit = async () => {
     if (user) {
       const userLocation = location.find(
         (loc) => loc.id === Number(user.location_id)

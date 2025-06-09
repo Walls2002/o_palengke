@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View, FlatList, RefreshControl } from "react-native";
 import { useOrderContext } from "@/provider/OrderProvider";
 import { Store } from "lucide-react-native";
 import { useAuth } from "@/provider/AuthProvider";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Order } from "@/types/OrderItem";  
+import { Order } from "@/types/OrderItem";
+import * as Notifications from "expo-notifications";
 
 const PendingScreen = () => {
   const { pendingOrders, fetchPendingOrders } = useOrderContext();
@@ -12,6 +13,37 @@ const PendingScreen = () => {
     isLoading: boolean;
   };
   const [refreshing, setRefreshing] = useState(false);
+
+  // useEffect(() => {
+  //   // Update the ref whenever pendingOrders changes
+
+  //   const sendNotification = async () => {
+  //     await Notifications.scheduleNotificationAsync({
+  //       content: {
+  //         title: "New Pending Order",
+  //         body: "You have a new pending order!",
+  //         sound: true,
+  //         subtitle: "Check your orders for details.",
+  //         priority: Notifications.AndroidNotificationPriority.HIGH,
+  //       },
+  //       trigger: {
+  //         seconds: 1,
+  //         repeats: false, // optional
+  //         channelId: "default", // Ensure you have created this channel
+  //       },
+  //     });
+  //   };
+
+  //   if (pendingOrders?.length > prevPendingOrdersLength.current) {
+  //     console.log("Pending orders updated:", pendingOrders.length);
+  //     console.log("Previous length:", prevPendingOrdersLength.current);
+  //     prevPendingOrdersLength.current = pendingOrders?.length || 0;
+  //     console.log("New previous length:", prevPendingOrdersLength.current);
+  //     sendNotification().then(() =>
+  //       console.log("Notification sent successfully")
+  //     );
+  //   }
+  // }, [pendingOrders.length]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -34,6 +66,7 @@ const PendingScreen = () => {
   }
 
   const renderOrder = ({ item: order }: { item: Order }) => {
+    // console.log("Rendering order:", pendingOrders.length);
     const storeName = order.store?.store_name || "Unknown Store";
     const contactNumber = order.store?.contact_number || "No contact";
 
@@ -110,7 +143,9 @@ const PendingScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         data={pendingOrders ?? []}
-        keyExtractor={(item: Order) => item.id?.toString() || Math.random().toString()}
+        keyExtractor={(item: Order) =>
+          item.id?.toString() || Math.random().toString()
+        }
         renderItem={renderOrder}
         contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
         ListEmptyComponent={

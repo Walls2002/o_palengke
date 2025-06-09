@@ -15,6 +15,7 @@ const ConfirmedScreen = () => {
       fetchConfirmedOrders();
     }
     // Force the loading indicator to disappear after 3 seconds
+    console.log("Refreshing confirmed orders...");
     setTimeout(() => {
       setRefreshing(false);
     }, 3000);

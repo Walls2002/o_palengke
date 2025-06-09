@@ -14,6 +14,23 @@ export const userApi = {
       throw error;
     }
   },
+  async checkEmailExists(email: string) {
+    try {
+      const response = await API.post(
+        "/customer/verify-email",
+        { email },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error checking email existence:", error);
+      throw error;
+    }
+  },
 
   async registerVendor(formData: FormData) {
     try {
@@ -27,7 +44,7 @@ export const userApi = {
       return response;
     } catch (error: any) {
       console.error("Error registration for vendor:", error);
-      throw error; 
+      throw error;
     }
   },
 };

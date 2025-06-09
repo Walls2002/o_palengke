@@ -135,7 +135,7 @@ const ProductDetail = () => {
       await refreshCart();
       setTimeout(() => {
         router.replace("/");
-      }, 1500);
+      }, 500);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -295,6 +295,7 @@ const ProductDetail = () => {
               <View className="flex justify-between flex-row items-center mt-10">
                 <Text className="text-lg text-black">Quantity</Text>
                 <TextInput
+                  readOnly={Number(productData?.quantity) === 0}
                   value={quantity}
                   onChangeText={(text) => {
                     const numericText = text.replace(/[^0-9]/g, "");
@@ -309,6 +310,7 @@ const ProductDetail = () => {
                 <Text className="text-lg text-black">Weight</Text>
                 <View className="relative w-[150px]">
                   <TouchableOpacity
+                    disabled={Number(productData?.quantity) === 0}
                     activeOpacity={1}
                     className="w-full h-12 border border-gray-300 bg-white rounded-lg px-4 justify-center"
                     onPress={() => setIsModalVisible(true)}
@@ -355,9 +357,14 @@ const ProductDetail = () => {
               </View>
               <View className="flex justify-center flex-row items-center mt-[50px] pb-10">
                 <TouchableOpacity
+                  disabled={Number(productData?.quantity) === 0}
                   onPress={handleAddToCart}
                   activeOpacity={1}
-                  className="bg-primary px-4 py-2 rounded-lg w-[250px] h-14"
+                  className={`px-4 py-2 rounded-lg w-[250px] h-14 ${
+                    Number(productData?.quantity) === 0
+                      ? "bg-red-500"
+                      : "bg-primary"
+                  }`}
                 >
                   <View className="flex flex-row justify-center items-center h-full">
                     <ShoppingCart
@@ -366,7 +373,9 @@ const ProductDetail = () => {
                       className="mr-2"
                     />
                     <Text className="text-white text-lg font-medium ml-3">
-                      Add to cart
+                      {Number(productData?.quantity) === 0
+                        ? "Out of Stock"
+                        : "Add to cart"}
                     </Text>
                   </View>
                 </TouchableOpacity>
