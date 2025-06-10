@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Store, User } from "lucide-react-native";
@@ -13,7 +14,7 @@ import { useAuth } from "@/provider/AuthProvider";
 import { localOrderApi } from "@/api/rider/localOrderApi";
 import { useOrders } from "@/provider/DeliveryOrderProvider";
 const LocalOrderScreen = () => {
-  const {fetchForDeliveryOrders} = useOrders();
+  const { fetchForDeliveryOrders } = useOrders();
   const [orders, setOrders] = useState([]);
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -152,11 +153,9 @@ const LocalOrderScreen = () => {
               onPress={() => {
                 handleAcceptOrder(item);
               }}
+              style={{ marginRight: 10 }}
             >
-              <View
-                className="bg-primary h-11 px-5 rounded-md flex justify-center items-center"
-                style={{ minWidth: 150 }}
-              >
+              <View className="bg-primary h-11 px-5 rounded-md flex justify-center items-center">
                 <Text className="text-lg font-semibold text-white">
                   Accept Delivery Order
                 </Text>

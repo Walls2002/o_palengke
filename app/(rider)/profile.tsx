@@ -36,6 +36,8 @@ import { Profile, UserCredentials } from "@/types/Profile";
 import { useAuth } from "@/provider/AuthProvider";
 import { userApi } from "@/api/user/userApi";
 import capitalizeWords from "@/utils/formatString";
+import axios from "axios";
+const baseUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ProfileScreen() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -156,10 +158,38 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = async () => {
+    const access_token = await AsyncStorage.getItem("auth_token");
+    const userString = await AsyncStorage.getItem("user");
+    const userData = userString ? JSON.parse(userString) : null;
+    const userId = userData ? userData.id : null;
     try {
+      try {
+        const storeExpoToken = await axios.post(
+          `${baseUrl}/users/store-push-token`,
+          {
+            user_id: userId,
+            expo_push_token: null, // Clear the Expo push token on logout
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          }
+        );
+
+        if (storeExpoToken.data.code === 200) {
+          console.log("Push notification token cleared successfully");
+        } else {
+          console.error("Error saving push notification token");
+        }
+      } catch (error) {
+        console.error("Failed to store Expo push token:", error);
+      }
+
       await AsyncStorage.removeItem("auth_token");
       await AsyncStorage.removeItem("user");
       await AsyncStorage.removeItem("user_type");
+
       setUser(null);
       setUserType(null);
       // Call the logout function from the AuthProvider

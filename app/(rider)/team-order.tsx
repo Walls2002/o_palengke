@@ -11,6 +11,9 @@ import { Store, User } from "lucide-react-native";
 import { teamOrderApi } from "@/api/rider/teamOrderApi";
 import Toast from "react-native-toast-message";
 import { useOrders } from "@/provider/DeliveryOrderProvider";
+import { localOrderApi } from "@/api/rider/localOrderApi";
+import { Alert } from "react-native";
+import { logger } from "react-native-reanimated/lib/typescript/logger";
 
 const TeamOrderScreen = () => {
   const [orders, setOrders] = useState([]);
@@ -160,11 +163,9 @@ const TeamOrderScreen = () => {
               onPress={() => {
                 handleAcceptOrder(item);
               }}
+              style={{ marginRight: 10 }}
             >
-              <View
-                className="bg-primary h-11 px-5 rounded-md flex justify-center items-center"
-                style={{ minWidth: 150 }}
-              >
+              <View className="bg-primary h-11 px-5 rounded-md flex justify-center items-center">
                 <Text className="text-lg font-semibold text-white">
                   Accept Delivery Order
                 </Text>
