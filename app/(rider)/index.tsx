@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Modal,
   Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Store, User } from "lucide-react-native";
@@ -14,6 +15,7 @@ import { deliveryApi } from "@/api/rider/deliveryApi";
 import Toast from "react-native-toast-message";
 import * as ImagePicker from "expo-image-picker";
 import { useOrders } from "@/provider/DeliveryOrderProvider";
+import { localOrderApi } from "@/api/rider/localOrderApi";
 
 const DeliveryScreen = () => {
   const { orders, loading, fetchForDeliveryOrders } = useOrders();
@@ -32,6 +34,66 @@ const DeliveryScreen = () => {
       setImage(result.assets[0]);
     }
   };
+
+  const handleCancelOrder = async (orderId: number) => {
+    return new Promise<void>((resolve) => {
+      Alert.alert(
+        "Cancel Order",
+        "Are you sure you want to cancel this order?",
+        [
+          {
+            text: "No",
+            style: "cancel",
+            onPress: () => resolve(), // Cancelled
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              try {
+                const response = await localOrderApi.cancelLocalOrder(orderId);
+                Toast.show({
+                  type: "success",
+                  text1: "Success",
+                  text2: response.message || "Order cancelled successfully.",
+                  text1Style: {
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  },
+                  text2Style: {
+                    fontSize: 16,
+                    fontWeight: "600",
+                  },
+                });
+
+                fetchForDeliveryOrders();
+                resolve();
+              } catch (err: any) {
+                console.log("Error accepting order:", err);
+                Toast.show({
+                  type: "error",
+                  text1: "Error",
+                  text2:
+                    err.message ||
+                    "An error occurred while cancelling the order.",
+                  text1Style: {
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  },
+                  text2Style: {
+                    fontSize: 16,
+                    fontWeight: "600",
+                  },
+                });
+                resolve();
+              }
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    });
+  };
+
   const uploadImageAndMarkDelivered = async () => {
     if (!image || !selectedOrderId) return;
 
@@ -159,6 +221,7 @@ const DeliveryScreen = () => {
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => handleMarkAsDelivered(item.id)}
+              style={{ marginRight: 10 }}
             >
               <View
                 className="bg-primary h-11 px-5 rounded-md flex justify-center items-center"
@@ -166,6 +229,21 @@ const DeliveryScreen = () => {
               >
                 <Text className="text-lg font-semibold text-white">
                   Mark as Delivered
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => {
+                handleCancelOrder(item.id);
+              }}
+            >
+              <View
+                className="bg-red-500 h-11 px-5 rounded-md flex justify-center items-center"
+                style={{ minWidth: 150 }}
+              >
+                <Text className="text-lg font-semibold text-white">
+                  Cancel Delivery Order
                 </Text>
               </View>
             </TouchableOpacity>

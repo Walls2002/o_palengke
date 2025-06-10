@@ -46,6 +46,7 @@ const Login = () => {
   const { loadUser } = useAuth();
   const baseUrl = process.env.EXPO_PUBLIC_API_URL;
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false); // New state for terms acceptance
 
   useEffect(() => {
     if (success) {
@@ -59,6 +60,18 @@ const Login = () => {
   }, [success]);
 
   const handleLogin = async () => {
+    if (!termsAccepted) {
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Terms not accepted",
+        text2: "Please accept the terms and conditions to proceed.",
+        visibilityTime: 3000,
+        topOffset: 50,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post(`${baseUrl}/login`, {
@@ -153,6 +166,7 @@ const Login = () => {
       });
     }
   };
+
   return (
     <SafeAreaView className="flex-1 items-center bg-white px-4">
       <Image
@@ -186,11 +200,37 @@ const Login = () => {
           )}
         </TouchableOpacity>
       </View>
+      <View className="flex-row items-center mb-4">
+        <TouchableOpacity
+          onPress={() => setTermsAccepted(!termsAccepted)}
+          className="mr-2"
+        >
+          <View
+            className={`w-5 h-5 border ${
+              termsAccepted ? "bg-primary" : "border-gray-300"
+            } rounded`}
+          />
+        </TouchableOpacity>
+        <Text className="text-textPrimary">
+          I agree to the{" "}
+          <TouchableOpacity
+            onPress={() => router.push("../terms-and-condition")}
+          >
+            <Text className="text-primary font-semibold">
+              Terms and Conditions
+            </Text>
+          </TouchableOpacity>
+        </Text>
+      </View>
       <TouchableOpacity
         activeOpacity={1}
         onPress={handleLogin}
-        disabled={loading}
-        className="w-[300px] h-12 bg-primary rounded-lg justify-center items-center"
+        disabled={loading || !termsAccepted || email == "" || password == ""} // Disable if terms not accepted
+        className={`w-[300px] h-12 ${
+          loading || !termsAccepted || email == "" || password == ""
+            ? "bg-gray-300"
+            : "bg-primary"
+        } rounded-lg justify-center items-center`}
       >
         {loading ? (
           <ActivityIndicator size="small" color="#ffffff" />
@@ -199,7 +239,7 @@ const Login = () => {
         )}
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => router.push("/forgot-password")} // Replace with your actual route
+        onPress={() => router.push("/forgot-password")}
         className="mt-4"
       >
         <Text className="text-primary text-sm font-medium">
